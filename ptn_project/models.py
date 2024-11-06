@@ -93,3 +93,8 @@ class DiscussionImage(models.Model):
 class Comment(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     comment = models.TextField(null=False, default="")
+
+# 대댓글 모델
+class CommentInComment(models.Model):
+    parent_comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
+    comment_in_comment = models.TextField(null=False, default="")
