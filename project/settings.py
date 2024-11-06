@@ -49,6 +49,10 @@ INSTALLED_APPS = [
     'accounts',
     # 우리 서비스의 프로젝트
     'ptn_project',
+    # 프로젝트 디테일 페이지의 기능을 모아놓은 앱
+    'project_detail',
+    # 대학교, 기술 스택, 장르를 필터링하는 기능을 모아놓은 앱
+    'search',
     # rest_framework
     'rest_framework',
     #corsheaders

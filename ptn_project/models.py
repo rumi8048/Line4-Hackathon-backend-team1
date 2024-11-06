@@ -1,5 +1,6 @@
 from django.db import models
-from accounts.models import Account, GenreTag, UniversityTag, StackTag
+from accounts.models import Account
+from search.models import GenreTag, UniversityTag, StackTag
 
 def thumbnail_upload_path(instance, filename):
     return f'ptn_project/thumbnail/{instance.id}/{filename}'
