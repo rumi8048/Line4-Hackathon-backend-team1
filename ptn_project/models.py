@@ -97,6 +97,6 @@ class Comment(models.Model):
     comment = models.TextField(null=False, default="")
 
 # 대댓글 모델
-class CommentInComment(models.Model):
+class InComment(models.Model):
     parent_comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name='comment_in_comment')
-    comment_in_comment = models.TextField(null=False, default="")
+    in_comment = models.TextField(null=False, default="")
