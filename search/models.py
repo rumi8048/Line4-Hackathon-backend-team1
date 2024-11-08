@@ -14,4 +14,4 @@ class StackTag(models.Model):
     stack_name = models.CharField(null=False, max_length=255)
 
 class Platform(models.Model):
-    platform = models.CharField(null=False, max_length=255)
+    platform_name = models.CharField(null=False, max_length=255)
