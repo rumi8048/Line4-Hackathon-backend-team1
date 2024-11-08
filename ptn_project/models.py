@@ -26,7 +26,7 @@ class Project(models.Model):
     # 업로드 날짜
     upload_date = models.DateTimeField(auto_now_add=True)
     # 수행 기간
-    period = models.DateTimeField(auto_now_add=True)
+    period = models.TextField(null=False, default="")
     link = models.TextField(null=False)
     # 스크랩한 유저 계정을 저장하는 필드
     scrap_accounts = models.ManyToManyField(Account, related_name= "scrap_projects")
