@@ -12,3 +12,6 @@ class GenreTag(models.Model):
 class StackTag(models.Model):
     # 스택 이름
     stack_name = models.CharField(null=False, max_length=255)
+
+class Platform(models.Model):
+    platform = models.CharField(null=False, max_length=255)
