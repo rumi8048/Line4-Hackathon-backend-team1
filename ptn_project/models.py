@@ -33,7 +33,7 @@ class Project(models.Model):
     # 좋아요 누른 유저 계정을 확인하는 MTM 필드
     like_accounts = models.ManyToManyField(Account, related_name= "like_projects")
     like_count = models.IntegerField(null=False, default=0)
-    view_count = models.IntegerField(null=False, default=0)
+    
     # 플랫폼
     project_platform = models.ManyToManyField(Platform, related_name= "project")
     # 장르
