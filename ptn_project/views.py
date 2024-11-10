@@ -21,15 +21,21 @@ class ProjectViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixins.Li
             serializers.validated_data['project_thumbnail'] = 'ptn_project/default_image.png'
 
         self.perform_create(serializers)
-        return Response({'message': '프로젝트가 성공적으로 생성되었습니다.'})
+        return Response({'message': '프로젝트가 성공적으로 생성되었습니다.', 'project_id': serializers.data.get('id')})
 
-class GenreProjectViewSet(viewsets.GenericViewSet, mixins.ListModelMixin):
-    queryset = Project.objects.all()
+    def list(self, request):
+        project = self.get_queryset().order_by('?')
+        serializer = ProjectSerializer(project, many=True)
+        return Response(serializer.data)
 
-    def get_serializer_class(self):
-        return ProjectSerializer    
+    @action(methods=['GET'], detail=False, url_path="recommend")
+    def recommend(self, request):
+        # 여기 수정해야함!
+        project = self.get_queryset().order_by('?')
+        serializer = ProjectSerializer(project, many=True)
+        return Response(serializer.data)
     
-    @action(detail=False, methods=['post'])
+    @action(detail=False, methods=['post'], url_path='filter')
     def filter_by_genre(self, request):
         genres = request.data.get('genre', [])
         if not genres:
@@ -47,6 +53,8 @@ class GenreProjectViewSet(viewsets.GenericViewSet, mixins.ListModelMixin):
         projects = projects.distinct()
         serializer = self.get_serializer(projects, many=True)
         return Response(serializer.data)
+      
+
     
 class FindUserViewSet(viewsets.GenericViewSet, mixins.ListModelMixin):
     queryset = Account.objects.all()

@@ -1,6 +1,4 @@
-from django.forms import ValidationError
 from rest_framework import serializers
-
 from accounts.models import Account
 from ptn_project.models import CollaboratorMiddleTable, Project
 from search.models import GenreTag, Platform, StackTag, UniversityTag
@@ -28,6 +26,8 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     collaborator = CollaboratorMiddleTableSerializer(source='collaboratormiddletable_set', many=True)
     upload_date = serializers.SerializerMethodField()
+    is_liked = serializers.SerializerMethodField()
+
     project_platform = serializers.SlugRelatedField(
         slug_field='platform_name',
         queryset=Platform.objects.all(),
@@ -70,6 +70,12 @@ class ProjectSerializer(serializers.ModelSerializer):
     def get_upload_date(self, instance):
         return instance.upload_date.strftime('%Y-%m-%d')
     
+    def get_is_liked(self, instance):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            if request.user.account in instance.like_accounts.all():
+                return True
+        return False
     
     def create(self, validated_data):
         # ManyToMany 필드 데이터 분리
@@ -100,7 +106,6 @@ class ProjectSerializer(serializers.ModelSerializer):
 
         # 다중 이미지 처리
         image_set = self.context['request'].FILES
-        print(image_set)
         for image_data in image_set.getlist('image'):
             ProjectImage.objects.create(project=project, image=image_data)
         return project
