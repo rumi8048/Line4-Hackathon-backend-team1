@@ -60,7 +60,6 @@ class UniversityViewSet(viewsets.GenericViewSet, mixins.ListModelMixin):
         return Response({"university": university_list})
 
 # 플랫폼 목록을 출력하는 viewset
-# 대학 목록을 출력하는 viewset
 class PlatformViewSet(viewsets.GenericViewSet, mixins.ListModelMixin):
         
     def get_queryset(self):
