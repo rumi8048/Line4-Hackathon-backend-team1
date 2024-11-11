@@ -27,7 +27,12 @@ class Project(models.Model):
     upload_date = models.DateTimeField(auto_now_add=True)
     # 수행 기간
     period = models.TextField(null=False, default="")
-    link = models.TextField(null=False)
+
+    # 웹, ios, 안드로이드 링크
+    web_link = models.TextField(null=False, default="")
+    ios_link = models.TextField(null=True, default="")
+    android_link = models.TextField(null=True, default="")
+
     # 스크랩한 유저 계정을 저장하는 필드
     scrap_accounts = models.ManyToManyField(Account, related_name= "scrap_projects")
     # 좋아요 누른 유저 계정을 확인하는 MTM 필드

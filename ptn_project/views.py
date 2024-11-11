@@ -60,6 +60,7 @@ class ProjectViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixins.Li
       
 
     
+# 이 부분 해야함
 class FindUserViewSet(viewsets.GenericViewSet, mixins.ListModelMixin):
     queryset = Account.objects.all()
     serializer_class = AccountSerializer
