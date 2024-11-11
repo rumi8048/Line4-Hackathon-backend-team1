@@ -1,8 +1,5 @@
 from django.contrib import admin
-from .models import Account, UniversityTag, GenreTag, StackTag
+from .models import Account
 
 # Register your models here.
 admin.site.register(Account)
-admin.site.register(UniversityTag)
-admin.site.register(GenreTag)
-admin.site.register(StackTag)
