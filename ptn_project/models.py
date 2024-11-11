@@ -29,9 +29,9 @@ class Project(models.Model):
     period = models.TextField(null=False, default="")
 
     # 웹, ios, 안드로이드 링크
-    web_link = models.TextField(null=False, default="")
-    ios_link = models.TextField(null=True, default="")
-    android_link = models.TextField(null=True, default="")
+    web_link = models.TextField(null=True,blank=True, default="")
+    ios_link = models.TextField(null=True,blank=True, default="")
+    android_link = models.TextField(null=True,blank=True, default="")
 
     # 스크랩한 유저 계정을 저장하는 필드
     scrap_accounts = models.ManyToManyField(Account, related_name= "scrap_projects")
@@ -91,6 +91,7 @@ class AIFeedbackSummary(models.Model):
 class Discussion(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='discussion')
     discussion_writer = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='discussion')
+    title = models.CharField(null=False, max_length=255)
     upload_date = models.DateTimeField(auto_now_add=True)
     description = models.TextField(null=False, default="")
 

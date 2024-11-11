@@ -14,6 +14,33 @@ class CollaboratorMiddleTableSerializer(serializers.ModelSerializer):
     # 유저 이름을 출력하도록 변경
     def get_nickname(self, instance):
         return instance.account.nickname
+    
+class DiscussionImageSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField()
+
+    class Meta:
+        model = DiscussionImage
+        fields = ['image']
+
+class DiscussionSerializer(serializers.ModelSerializer):
+    discussion_writer = serializers.PrimaryKeyRelatedField(queryset=Account.objects.all())
+    discussion_image = DiscussionImageSerializer(many=True, required=False)
+
+    class Meta:
+        model = Discussion
+        fields = ['discussion_writer', 'title', 'description', 'discussion_image']
+    
+    def get_discussion_image(self, instance):
+        # request 객체를 통해 base URL 가져오기
+        request = self.context.get('request')
+        if request:
+            return [
+                request.build_absolute_uri(image.image.url)
+                for image in instance.discussion_image.all()
+            ]
+        else:
+            # request 객체가 없을 경우 상대 경로만 반환
+            return [image.image.url for image in instance.discussion_image.all()]
 
 class ProjectImageSerializer(serializers.ModelSerializer):
     image = serializers.ImageField()
@@ -27,6 +54,7 @@ class ProjectSerializer(serializers.ModelSerializer):
     collaborator = CollaboratorMiddleTableSerializer(source='collaboratormiddletable_set', many=True)
     upload_date = serializers.SerializerMethodField()
     is_liked = serializers.SerializerMethodField()
+    discussion = DiscussionSerializer(many=True)
 
     project_platform = serializers.SlugRelatedField(
         slug_field='platform_name',
@@ -84,6 +112,8 @@ class ProjectSerializer(serializers.ModelSerializer):
         stacks_data = validated_data.pop('project_stack', [])
         universities_data = validated_data.pop('project_university', [])
         collaborators_data = validated_data.pop('collaboratormiddletable_set', [])
+        # 고민 되는 부분을 플젝 생성 시 추가
+        discussions_data = validated_data.pop('discussion', [])
 
          # Project 객체 생성
         project = Project.objects.create(**validated_data)
@@ -103,12 +133,21 @@ class ProjectSerializer(serializers.ModelSerializer):
                 project=project, account=account,
                 role=role, is_leader= is_leader
             )
+        # Discussion 및 DiscussionImage 처리
+        for discussion_data in discussions_data:
+            images_data = discussion_data.pop('discussion_image', [])
+            discussion = Discussion.objects.create(project=project, **discussion_data)
 
+            for image_data in images_data:
+                DiscussionImage.objects.create(discussion=discussion, image=image_data['image'])
+        
+                                               
         # 다중 이미지 처리
         image_set = self.context['request'].FILES
         for image_data in image_set.getlist('image'):
             ProjectImage.objects.create(project=project, image=image_data)
         return project
+    
     def update(self, instance, validated_data):
         # ManyToMany 필드 데이터 분리
         platforms_data = validated_data.pop('project_platform', [])
@@ -124,6 +163,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             image.image.delete(save=False)
             image.delete()
 
+        
         # 기본 Project 객체 업데이트
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
@@ -148,7 +188,7 @@ class ProjectSerializer(serializers.ModelSerializer):
                 project=instance, account=account,
                 role=role, is_leader= is_leader
             )
-
+            
         # 다중 이미지 처리
         image_set = self.context['request'].FILES
         for image_data in image_set.getlist('image'):
