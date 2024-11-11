@@ -20,7 +20,10 @@ class Account(models.Model):
     # 여기서부터는 커스텀
     user_university = models.ForeignKey(UniversityTag, on_delete=models.CASCADE)
     favorite_genre = models.ManyToManyField(GenreTag, related_name= "account")
+    name = models.CharField(max_length=255)
     nickname = models.CharField(max_length=255, unique=True)
     total_point = models.IntegerField(default=0)
     description = models.TextField(max_length=255, default="")
 
+    def __str__(self):
+            return self.user.username

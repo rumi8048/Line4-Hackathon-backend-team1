@@ -159,3 +159,7 @@ CORS_ALLOWED_ORIGINS = [
 'http://프론트엔드주소', 
 'http://프론트주소:포트번호',
 ]
+
+# 세션 만료 설정 (옵션)
+SESSION_COOKIE_AGE = 86400  # 세션 만료 시간 (하루)
+SESSION_SAVE_EVERY_REQUEST = True  # 매 요청 시마다 세션 연장
