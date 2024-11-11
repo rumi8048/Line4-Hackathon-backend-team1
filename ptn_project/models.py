@@ -85,6 +85,8 @@ class AIFeedbackSummary(models.Model):
 # 고민 되었던 부분 모델
 class Discussion(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='discussion')
+    discussion_writer = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='discussion')
+    upload_date = models.DateTimeField(auto_now_add=True)
     description = models.TextField(null=False, default="")
 
 class DiscussionImage(models.Model):
@@ -94,9 +96,13 @@ class DiscussionImage(models.Model):
 
 class Comment(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='comment')
+    comment_writer = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='comment')
+    upload_date = models.DateTimeField(auto_now_add=True)
     comment = models.TextField(null=False, default="")
 
 # 대댓글 모델
 class InComment(models.Model):
-    parent_comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name='comment_in_comment')
+    parent_comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name='in_comment')
+    in_comment_writer = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='in_comment')
+    upload_date = models.DateTimeField(auto_now_add=True)
     in_comment = models.TextField(null=False, default="")

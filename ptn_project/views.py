@@ -30,9 +30,13 @@ class ProjectViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixins.Li
 
     @action(methods=['GET'], detail=False, url_path="recommend")
     def recommend(self, request):
-        # 여기 수정해야함!
-        project = self.get_queryset().order_by('?')
-        serializer = ProjectSerializer(project, many=True)
+        user = request.user.account  # 현재 요청한 사용자의 Account 모델 가져오기
+        
+        favorite_genres = user.favorite_genre.all()  # 사용자의 favorite_genre 필드
+        # 사용자의 favorite_genre 태그를 포함하는 프로젝트 필터링
+        projects = Project.objects.filter(project_genre__in=favorite_genres).distinct()
+        
+        serializer = ProjectSerializer(projects, many=True)
         return Response(serializer.data)
     
     @action(detail=False, methods=['post'], url_path='filter')
