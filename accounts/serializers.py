@@ -53,3 +53,13 @@ class SignUpSerializer(serializers.ModelSerializer):
             description=validated_data.get('description', "")
         )
         return account
+    
+class AccountSerializer(serializers.ModelSerializer):
+    university = serializers.SerializerMethodField()
+    
+    def get_university(self, instance):
+        return instance.user_university.university_name
+    class Meta:
+        model = Account
+        fields = ['id', 'nickname', 'university']
+        read_only_fields = ('id', 'nickname', 'university')

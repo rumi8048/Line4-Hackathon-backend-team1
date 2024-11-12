@@ -18,10 +18,18 @@ in_comment_router.register("in_comment", InCommentViewSet, basename="in_comment"
 in_comment_detail_router = routers.SimpleRouter(trailing_slash=False)
 in_comment_detail_router.register("in_comment", DetailInCommentViewSet, basename="in_comment")
 
+discussion_router = routers.SimpleRouter(trailing_slash=False)
+discussion_router.register("discussion", DiscussionViewSet, basename="discussion")
+
+discussion_detail_router = routers.SimpleRouter(trailing_slash=False)
+discussion_detail_router.register("discussion", DetailDiscussionViewSet, basename="discussion")
+
 urlpatterns = [
   path('', include(project_router.urls)),
   path('<int:project_id>/', include(comment_router.urls)),
   path('<int:project_id>/', include(comment_detail_router.urls)),
   path('<int:project_id>/comment/<int:comment_id>/', include(in_comment_router.urls)),
   path('<int:project_id>/comment/<int:comment_id>/', include(in_comment_detail_router.urls)),
+  path('<int:project_id>/', include(discussion_router.urls)),
+  path('<int:project_id>/', include(discussion_detail_router.urls)),
 ]

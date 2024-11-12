@@ -6,7 +6,7 @@ from ptn_project.models import Comment, Project
 from ptn_project.serializers import ProjectSerializer
 from .models import *
 from .serializers import *
-from .permissions import IsCommentOwnerOrReadOnly, IsInCommentOwnerOrReadOnly, IsPossibleCommentsOrReadOnly, IsProjectOwnerOrReadOnly
+from .permissions import IsCommentOwnerOrReadOnly, IsDiscussionOwnerOrReadOnly, IsInCommentOwnerOrReadOnly, IsPossibleCommentsOrReadOnly, IsPossibleDiscussionOrReadOnly, IsProjectOwnerOrReadOnly
 # Create your views here.
 class ProjectDetailViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
     queryset = Project.objects.all()
@@ -121,3 +121,38 @@ class DetailInCommentViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin,
     def destroy (self, request, *args, **kwargs):
         super().destroy(request, *args, **kwargs)
         return Response({'message': '대댓글이 성공적으로 삭제되었습니다.'})
+    
+class DiscussionViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixins.ListModelMixin):
+    queryset = Discussion.objects.all()
+    serializer_class = DiscussionSerializer
+    
+    def create(self, request, project_id=None):
+        project = get_object_or_404(Project, id=project_id)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(discussion_writer=request.user.account, project=project)
+        return Response(serializer.data)
+    
+    def get_permissions(self):
+        if self.action in ["create"]:
+            return [IsPossibleDiscussionOrReadOnly()]
+        return []
+    
+    def get_queryset(self):
+        project = self.kwargs.get("project_id")
+        queryset = Discussion.objects.filter(project_id=project)
+        return queryset
+
+class DetailDiscussionViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
+    queryset = Discussion.objects.all()
+    serializer_class = DiscussionSerializer
+    
+    def get_permissions(self):
+        if self.action in ["update", "destroy", "partial_update"]:
+            return [IsDiscussionOwnerOrReadOnly()]
+        return []
+    
+    def destroy (self, request, *args, **kwargs):
+        super().destroy(request, *args, **kwargs)
+        return Response({'message': '고민 게시글이 성공적으로 삭제되었습니다.'})
+    
