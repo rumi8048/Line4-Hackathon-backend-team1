@@ -33,9 +33,34 @@ class IsInCommentOwnerOrReadOnly(BasePermission):
             return True
         return obj.in_comment_writer == request.user or request.user.is_superuser
     
-
+class IsDiscussionOwnerOrReadOnly(BasePermission):
+    def has_permission(self, request, view):
+        return request.user and request.user.is_authenticated
+    
+    def has_object_permission(self, request, view, obj):
+        if request.method in SAFE_METHODS:
+            return True
+        return obj.discussion_writer == request.user or request.user.is_superuser
+    
+class IsFeedbackOwnerOrReadOnly(BasePermission):
+    def has_permission(self, request, view):
+        return request.user and request.user.is_authenticated
+    
+    def has_object_permission(self, request, view, obj):
+        if request.method in SAFE_METHODS:
+            return True
+        return obj.feedback_writer == request.user or request.user.is_superuser
     
 class IsPossibleCommentsOrReadOnly(BasePermission):
+    def has_permission(self, request, view):
+        return request.user and request.user.is_authenticated
+    
+    def has_object_permission(self, request, view, obj):
+        if request.method in SAFE_METHODS:
+            return True
+        return request.user and request.user.is_authenticated
+    
+class IsPossibleDiscussionOrReadOnly(BasePermission):
     def has_permission(self, request, view):
         return request.user and request.user.is_authenticated
     

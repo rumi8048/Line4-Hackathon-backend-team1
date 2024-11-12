@@ -1,8 +1,11 @@
+from urllib.parse import urljoin
 from rest_framework import serializers
 from accounts.models import Account
 from ptn_project.models import CollaboratorMiddleTable, Project
 from search.models import GenreTag, Platform, StackTag, UniversityTag
 from .models import *
+
+BASE_URL = 'http://127.0.0.1:8000/'
 
 class CollaboratorMiddleTableSerializer(serializers.ModelSerializer):
     account_id = serializers.PrimaryKeyRelatedField(queryset=Account.objects.all())  # account 필드를 쓰기 가능하게 설정
@@ -14,47 +17,26 @@ class CollaboratorMiddleTableSerializer(serializers.ModelSerializer):
     # 유저 이름을 출력하도록 변경
     def get_nickname(self, instance):
         return instance.account.nickname
-    
-class DiscussionImageSerializer(serializers.ModelSerializer):
-    image = serializers.ImageField()
 
-    class Meta:
-        model = DiscussionImage
-        fields = ['image']
-
-class DiscussionSerializer(serializers.ModelSerializer):
-    discussion_writer = serializers.PrimaryKeyRelatedField(queryset=Account.objects.all())
-    discussion_image = DiscussionImageSerializer(many=True, required=False)
-
-    class Meta:
-        model = Discussion
-        fields = ['discussion_writer', 'title', 'description', 'discussion_image']
-    
-    def get_discussion_image(self, instance):
-        # request 객체를 통해 base URL 가져오기
-        request = self.context.get('request')
-        if request:
-            return [
-                request.build_absolute_uri(image.image.url)
-                for image in instance.discussion_image.all()
-            ]
-        else:
-            # request 객체가 없을 경우 상대 경로만 반환
-            return [image.image.url for image in instance.discussion_image.all()]
 
 class ProjectImageSerializer(serializers.ModelSerializer):
     image = serializers.ImageField()
     class Meta:
         model = ProjectImage
         fields = ['image']
-
+    
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        base_url = BASE_URL
+        representation['image'] = base_url + instance.image.url
+        return representation
+    
 class ProjectSerializer(serializers.ModelSerializer):
-    images = serializers.SerializerMethodField()
-
+    images = ProjectImageSerializer(source='project_image', many=True, required=False)
     collaborator = CollaboratorMiddleTableSerializer(source='collaboratormiddletable_set', many=True)
     upload_date = serializers.SerializerMethodField()
     is_liked = serializers.SerializerMethodField()
-    discussion = DiscussionSerializer(many=True)
+    can_update_and_delete = serializers.SerializerMethodField()
 
     project_platform = serializers.SlugRelatedField(
         slug_field='platform_name',
@@ -83,27 +65,32 @@ class ProjectSerializer(serializers.ModelSerializer):
         exclude = ['scrap_accounts', 'like_accounts']
         read_only_fields = ('id', 'scrap_accounts', 'like_accounts', 'like_count')
     
-    def get_images(self, instance):
-        # request 객체를 통해 base URL 가져오기
+    def get_can_update_and_delete(self, instance):
         request = self.context.get('request')
-        if request:
-            return [
-                request.build_absolute_uri(image.image.url)
-                for image in instance.project_image.all()
-            ]
-        else:
-            # request 객체가 없을 경우 상대 경로만 반환
-            return [image.image.url for image in instance.project_image.all()]
+        if request and request.user.is_authenticated:
+            if request.user.account in instance.collaborator.all():
+                return True
+        return False
     
     def get_upload_date(self, instance):
         return instance.upload_date.strftime('%Y-%m-%d')
     
     def get_is_liked(self, instance):
         request = self.context.get('request')
+        print(request)
         if request and request.user.is_authenticated:
             if request.user.account in instance.like_accounts.all():
                 return True
         return False
+    
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        base_url = BASE_URL
+        if instance.project_thumbnail:
+            representation['project_thumbnail'] = base_url + instance.project_thumbnail.url
+        else:
+            representation['project_thumbnail'] = base_url + 'media/KakaoTalk_Photo_2024-10-31-14-56-43.png'
+        return representation
     
     def create(self, validated_data):
         # ManyToMany 필드 데이터 분리
@@ -112,8 +99,6 @@ class ProjectSerializer(serializers.ModelSerializer):
         stacks_data = validated_data.pop('project_stack', [])
         universities_data = validated_data.pop('project_university', [])
         collaborators_data = validated_data.pop('collaboratormiddletable_set', [])
-        # 고민 되는 부분을 플젝 생성 시 추가
-        discussions_data = validated_data.pop('discussion', [])
 
          # Project 객체 생성
         project = Project.objects.create(**validated_data)
@@ -133,15 +118,7 @@ class ProjectSerializer(serializers.ModelSerializer):
                 project=project, account=account,
                 role=role, is_leader= is_leader
             )
-        # Discussion 및 DiscussionImage 처리
-        for discussion_data in discussions_data:
-            images_data = discussion_data.pop('discussion_image', [])
-            discussion = Discussion.objects.create(project=project, **discussion_data)
-
-            for image_data in images_data:
-                DiscussionImage.objects.create(discussion=discussion, image=image_data['image'])
-        
-                                               
+                                      
         # 다중 이미지 처리
         image_set = self.context['request'].FILES
         for image_data in image_set.getlist('image'):
@@ -156,28 +133,43 @@ class ProjectSerializer(serializers.ModelSerializer):
         universities_data = validated_data.pop('project_university', [])
         collaborators_data = validated_data.pop('collaboratormiddletable_set', [])
 
-        # 기존 이미지를 삭제
-        existing_images = ProjectImage.objects.filter(project=instance)
-        for image in existing_images:
-            # 실제 파일 시스템에서 이미지 파일 삭제
-            image.image.delete(save=False)
-            image.delete()
+        # project_thumbnail 필드 처리
+        if 'project_thumbnail' in validated_data:
+            if instance.project_thumbnail:
+                # 기존 이미지를 삭제
+                instance.project_thumbnail.delete(save=False)
+            instance.project_thumbnail = validated_data.pop('project_thumbnail')
+            
+        image_set = self.context['request'].FILES
+        if (image_set):
+            # 기존 이미지를 삭제
+            existing_images = ProjectImage.objects.filter(project=instance)
+            for image in existing_images:
+                # 실제 파일 시스템에서 이미지 파일 삭제
+                image.image.delete(save=False)
+                image.delete()
 
         
         # 기본 Project 객체 업데이트
         for attr, value in validated_data.items():
-            setattr(instance, attr, value)
+            if value is not None:
+                setattr(instance, attr, value)
         instance.save()
 
 
         # ManyToMany 필드 설정
-        instance.project_platform.set(platforms_data)
-        instance.project_genre.set(genres_data)
-        instance.project_stack.set(stacks_data)
-        instance.project_university.set(universities_data)
+        if platforms_data:
+            instance.project_platform.set(platforms_data)
+        if genres_data:
+            instance.project_genre.set(genres_data)
+        if stacks_data:
+            instance.project_stack.set(stacks_data)
+        if universities_data:
+            instance.project_university.set(universities_data)
 
-         # 기존 CollaboratorMiddleTable 항목 삭제
-        instance.collaboratormiddletable_set.all().delete()
+        if collaborators_data:
+            # 기존 CollaboratorMiddleTable 항목 삭제
+            instance.collaboratormiddletable_set.all().delete()
         
         # Collaborator 처리
         for collaborator_data in collaborators_data:
@@ -195,12 +187,3 @@ class ProjectSerializer(serializers.ModelSerializer):
             ProjectImage.objects.create(project=instance, image=image_data)
         return instance
     
-class AccountSerializer(serializers.ModelSerializer):
-    university = serializers.SerializerMethodField()
-    
-    def get_university(self, instance):
-        return instance.user_university.university_name
-    class Meta:
-        model = Account
-        fields = ['id', 'nickname', 'university']
-        read_only_fields = ('id', 'nickname', 'university')

@@ -1,8 +1,7 @@
-from django.shortcuts import get_object_or_404, render
 from rest_framework.response import Response
 from rest_framework import viewsets, mixins
 from rest_framework.decorators import action
-
+from django.contrib.auth.models import User
 from ptn_project.models import Project
 from .models import *
 from .serializers import *
@@ -59,13 +58,3 @@ class ProjectViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixins.Li
         return Response(serializer.data)
       
 
-    
-# 이 부분 해야함
-class FindUserViewSet(viewsets.GenericViewSet, mixins.ListModelMixin):
-    queryset = Account.objects.all()
-    serializer_class = AccountSerializer
-
-    def list(self, request):
-        queryset = self.get_queryset()
-        serializer = self.get_serializer(queryset, many=True)
-        return Response({"users":serializer.data})
