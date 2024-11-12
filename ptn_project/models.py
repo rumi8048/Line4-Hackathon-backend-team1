@@ -65,22 +65,7 @@ class ProjectImage(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='project_image')
     image = models.ImageField(null=True, upload_to=detail_image_upload_path, default='KakaoTalk_Photo_2024-10-31-14-56-43.png')
 
-# 사용자들이 작성한 피드백을 저장하는 모델
-class UserFeedback(models.Model):
 
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='feedback')
-    feedback_writer = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='feedback')
-    # 업로드 날짜
-    upload_date = models.DateTimeField(auto_now_add=True)
-    # 피드백 채택 여부 확인
-    is_adopted = models.BooleanField(default=False, null=False)
-    # 피드백 내용
-    feedback_description = models.TextField(null=False, default="")
-
-class FeedbackImage(models.Model):
-    # 피드백을 외래키로 가짐
-    feedback = models.ForeignKey(UserFeedback, on_delete=models.CASCADE, related_name='feedback_image')
-    image = models.ImageField(null=True, upload_to=feedback_image_upload_path, default='KakaoTalk_Photo_2024-10-31-14-56-43.png')
 
 # AI 가 요약해준 피드백을 저장하는 모델
 class AIFeedbackSummary(models.Model):
@@ -94,6 +79,25 @@ class Discussion(models.Model):
     title = models.CharField(null=False, max_length=255)
     upload_date = models.DateTimeField(auto_now_add=True)
     description = models.TextField(null=False, default="")
+
+
+# 사용자들이 작성한 피드백을 저장하는 모델
+class UserFeedback(models.Model):
+
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='feedback')
+    feedback_writer = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='feedback')
+    # 업로드 날짜
+    upload_date = models.DateTimeField(auto_now_add=True)
+    # 피드백 채택 여부 확인
+    is_adopted = models.BooleanField(default=False, null=False)
+    # 피드백 내용
+    feedback_description = models.TextField(null=False, default="")
+    discussion = models.ManyToManyField(Discussion, related_name='feedback')
+
+class FeedbackImage(models.Model):
+    # 피드백을 외래키로 가짐
+    feedback = models.ForeignKey(UserFeedback, on_delete=models.CASCADE, related_name='feedback_image')
+    image = models.ImageField(null=True, upload_to=feedback_image_upload_path, default='KakaoTalk_Photo_2024-10-31-14-56-43.png')
 
 class DiscussionImage(models.Model):
     # 고민 되었던 부분을 외래키로 가짐

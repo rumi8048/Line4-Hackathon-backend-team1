@@ -1,8 +1,11 @@
+from urllib.parse import urljoin
 from rest_framework import serializers
 from accounts.models import Account
 from ptn_project.models import CollaboratorMiddleTable, Project
 from search.models import GenreTag, Platform, StackTag, UniversityTag
 from .models import *
+
+BASE_URL = 'http://127.0.0.1:8000/'
 
 class CollaboratorMiddleTableSerializer(serializers.ModelSerializer):
     account_id = serializers.PrimaryKeyRelatedField(queryset=Account.objects.all())  # account 필드를 쓰기 가능하게 설정
@@ -21,13 +24,19 @@ class ProjectImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProjectImage
         fields = ['image']
-
+    
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        base_url = BASE_URL
+        representation['image'] = base_url + instance.image.url
+        return representation
+    
 class ProjectSerializer(serializers.ModelSerializer):
-    images = serializers.SerializerMethodField()
-
+    images = ProjectImageSerializer(source='project_image', many=True, required=False)
     collaborator = CollaboratorMiddleTableSerializer(source='collaboratormiddletable_set', many=True)
     upload_date = serializers.SerializerMethodField()
     is_liked = serializers.SerializerMethodField()
+    can_update_and_delete = serializers.SerializerMethodField()
 
     project_platform = serializers.SlugRelatedField(
         slug_field='platform_name',
@@ -56,27 +65,32 @@ class ProjectSerializer(serializers.ModelSerializer):
         exclude = ['scrap_accounts', 'like_accounts']
         read_only_fields = ('id', 'scrap_accounts', 'like_accounts', 'like_count')
     
-    def get_images(self, instance):
-        # request 객체를 통해 base URL 가져오기
+    def get_can_update_and_delete(self, instance):
         request = self.context.get('request')
-        if request:
-            return [
-                request.build_absolute_uri(image.image.url)
-                for image in instance.project_image.all()
-            ]
-        else:
-            # request 객체가 없을 경우 상대 경로만 반환
-            return [image.image.url for image in instance.project_image.all()]
+        if request and request.user.is_authenticated:
+            if request.user.account in instance.collaborator.all():
+                return True
+        return False
     
     def get_upload_date(self, instance):
         return instance.upload_date.strftime('%Y-%m-%d')
     
     def get_is_liked(self, instance):
         request = self.context.get('request')
+        print(request)
         if request and request.user.is_authenticated:
             if request.user.account in instance.like_accounts.all():
                 return True
         return False
+    
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        base_url = BASE_URL
+        if instance.project_thumbnail:
+            representation['project_thumbnail'] = base_url + instance.project_thumbnail.url
+        else:
+            representation['project_thumbnail'] = base_url + 'media/KakaoTalk_Photo_2024-10-31-14-56-43.png'
+        return representation
     
     def create(self, validated_data):
         # ManyToMany 필드 데이터 분리

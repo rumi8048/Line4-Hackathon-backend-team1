@@ -6,7 +6,7 @@ from ptn_project.models import Comment, Project
 from ptn_project.serializers import ProjectSerializer
 from .models import *
 from .serializers import *
-from .permissions import IsCommentOwnerOrReadOnly, IsDiscussionOwnerOrReadOnly, IsInCommentOwnerOrReadOnly, IsPossibleCommentsOrReadOnly, IsPossibleDiscussionOrReadOnly, IsProjectOwnerOrReadOnly
+from .permissions import IsCommentOwnerOrReadOnly, IsDiscussionOwnerOrReadOnly, IsFeedbackOwnerOrReadOnly, IsInCommentOwnerOrReadOnly, IsPossibleCommentsOrReadOnly, IsPossibleDiscussionOrReadOnly, IsProjectOwnerOrReadOnly
 # Create your views here.
 class ProjectDetailViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
     queryset = Project.objects.all()
@@ -155,4 +155,73 @@ class DetailDiscussionViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin
     def destroy (self, request, *args, **kwargs):
         super().destroy(request, *args, **kwargs)
         return Response({'message': '고민 게시글이 성공적으로 삭제되었습니다.'})
+
+class FeedbackViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin):
+    queryset = UserFeedback.objects.all()
+
+    def get_serializer_class(self):
+        if self.action in ["create", "update", "partial_update"]:
+            return FeedbackSerializer
+        return FeedbackListSerializer
     
+    def create(self, request, project_id=None):
+        project = get_object_or_404(Project, id=project_id)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(feedback_writer=request.user.account, project=project)
+        return Response(serializer.data)
+    
+    def get_permissions(self):
+        if self.action in ["create"]:
+            return [IsPossibleDiscussionOrReadOnly()]
+        return []
+    
+    def get_queryset(self):
+        project = self.kwargs.get("project_id")
+        queryset = UserFeedback.objects.filter(project_id=project)
+        return queryset
+
+class DetailFeedbackViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
+    queryset = UserFeedback.objects.all()
+    
+    def get_serializer_class(self):
+        if self.action in ["update", "partial_update"]:
+            return FeedbackSerializer
+        return FeedbackListSerializer
+    
+    def get_permissions(self):
+        if self.action in ["update", "destroy", "partial_update"]:
+            return [IsFeedbackOwnerOrReadOnly()]
+        return []
+    
+    def update(self, request, *args, **kwargs):
+        super().update(request, *args, **kwargs)
+        return Response({'message': '피드백이 성공적으로 수정되었습니다.'})
+
+    def destroy (self, request, *args, **kwargs):
+        super().destroy(request, *args, **kwargs)
+        return Response({'message': '피드백이 성공적으로 삭제되었습니다.'})
+    
+    @action(methods=['POST'], detail=True, url_path="adopt")
+    def adopt(self, request, project_id=None, pk=None):
+        feedback = self.get_queryset().filter(id=pk).first()
+        if not feedback:
+            return Response({'message': '피드백을 찾을 수 없습니다.'}, status=404)
+        
+        point = request.data.get('point')
+        if point is None:
+            return Response({'message': '포인트 값을 입력해주세요.'}, status=400)
+        
+        try:
+            point = int(point)
+        except ValueError:
+            return Response({'message': '유효한 포인트 값을 입력해주세요.'}, status=400)
+        
+        feedback.is_adopted = True
+        feedback.save()
+        
+        feedback_writer = feedback.feedback_writer
+        feedback_writer.total_point += point
+        feedback_writer.save()
+        
+        return Response({'message': '피드백이 채택되었고 포인트가 추가되었습니다.'})
