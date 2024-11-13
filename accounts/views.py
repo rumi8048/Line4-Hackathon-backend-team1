@@ -50,9 +50,9 @@ class LoginView(viewsets.ViewSet):
         
         if user is not None:
             auth.login(request, user)  # 세션 생성
-            return JsonResponse({'message': '로그인 성공'}, status=200)
+            return Response({'message': '로그인 성공'}, status=200)
         else:
-            return JsonResponse({'message': '아이디 또는 비밀번호가 틀렸습니다'}, status=401)
+            return Response({'message': '아이디 또는 비밀번호가 틀렸습니다'}, status=401)
 
 @method_decorator(ensure_csrf_cookie, name='dispatch')
 class LogoutView(viewsets.ViewSet):
@@ -63,7 +63,7 @@ class LogoutView(viewsets.ViewSet):
     @action(detail=False, methods=['get'])
     def logout(self, request):
         auth.logout(request)  # 세션 삭제
-        return JsonResponse({'message': '로그아웃 성공'})
+        return Response({'message': '로그아웃 성공'})
 
 
 # 이 부분 해야함
