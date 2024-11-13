@@ -9,6 +9,7 @@ from django.http import JsonResponse
 from django.contrib import auth 
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
+from rest_framework_simplejwt.tokens import RefreshToken
 
 class SignUpViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['post'])
@@ -34,12 +35,25 @@ class SignUpViewSet(viewsets.ViewSet):
             return Response({"message": "중복된 닉네임이 존재합니다"}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"message": "사용 가능한 닉네임입니다"})
     
-@method_decorator(ensure_csrf_cookie, name='dispatch')
+# @method_decorator(ensure_csrf_cookie, name='dispatch')
 class LoginView(viewsets.ViewSet):
     
-    def dispatch(self, *args, **kwargs):
-        return super().dispatch(*args, **kwargs)
+    # def dispatch(self, *args, **kwargs):
+    #     return super().dispatch(*args, **kwargs)
 
+    # @action(detail=False, methods=['post'])
+    # def login(self, request):
+    #     username = request.data.get('username')
+    #     password = request.data.get('password')
+        
+    #     # 사용자 인증
+    #     user = auth.authenticate(request, username=username, password=password)
+        
+    #     if user is not None:
+    #         auth.login(request, user)  # 세션 생성
+    #         return Response({'message': '로그인 성공'}, status=200)
+    #     else:
+    #         return Response({'message': '아이디 또는 비밀번호가 틀렸습니다'}, status=401)
     @action(detail=False, methods=['post'])
     def login(self, request):
         username = request.data.get('username')
@@ -49,12 +63,14 @@ class LoginView(viewsets.ViewSet):
         user = auth.authenticate(request, username=username, password=password)
         
         if user is not None:
-            auth.login(request, user)  # 세션 생성
-            return Response({'message': '로그인 성공'}, status=200)
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                # 'refresh': str(refresh),
+                'access': str(refresh.access_token),
+            }, status=200)
         else:
             return Response({'message': '아이디 또는 비밀번호가 틀렸습니다'}, status=401)
 
-@method_decorator(ensure_csrf_cookie, name='dispatch')
 class LogoutView(viewsets.ViewSet):
     
     def dispatch(self, *args, **kwargs):
