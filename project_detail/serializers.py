@@ -200,14 +200,21 @@ class AiSummarySerializer(serializers.ModelSerializer):
     class Meta:
         model = AIFeedbackSummary
         fields = ['id', 'upload_date', 'title', 'feedback_summary']
-        read_only_fields = ['id', 'title', 'upload_date']
+        read_only_fields = ['id', 'upload_date']
     
     def get_upload_date(self, instance):
         return instance.upload_date.strftime('%Y-%m-%d')
     
-    def create(self, validated_data):
-        
-        upload_date = timezone.now()
-        title = f"{upload_date.strftime('%Y년 %m월 %d일')} 보고서"
-        validated_data['title'] = title
-        return super().create(validated_data)
+    # def create(self, validated_data):
+    #     upload_date = timezone.now()
+    #     base_title = f"{upload_date.strftime('%y년 %m월 %d일')} 보고서"
+    #     title = base_title
+    #     counter = 1
+
+    #     # 동일한 이름이 있을 경우 숫자를 늘려가면서 title 설정
+    #     while AIFeedbackSummary.objects.filter(title=title).exists():
+    #         title = f"{base_title} ({counter})"
+    #         counter += 1
+
+    #     validated_data['title'] = title
+    #     return super().create(validated_data)

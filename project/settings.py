@@ -29,7 +29,8 @@ environ.Env.read_env(os.path.join(BASE_DIR,'.env'))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = env('DEBUG')
-
+# OpenAI API 키 가져오기
+OPENAI_API_KEY = env("OPENAI_API_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 
 ALLOWED_HOSTS = ['*']
@@ -73,7 +74,7 @@ REST_FRAMEWORK = {
 from datetime import timedelta
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=12),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
