@@ -1,7 +1,8 @@
+from django.utils import timezone
+from datetime import timedelta
 from rest_framework.response import Response
 from rest_framework import viewsets, mixins
 from rest_framework.decorators import action
-from django.contrib.auth.models import User
 from ptn_project.models import Project
 from .models import *
 from .serializers import *
@@ -58,3 +59,13 @@ class ProjectViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixins.Li
         return Response(serializer.data)
       
 
+class HomeProjectViewSet(viewsets.GenericViewSet, mixins.ListModelMixin):
+    queryset = Project.objects.all()
+    serializer_class = HomeProjectSerializer
+
+    def list(self, request):
+        one_week_ago = timezone.now() - timedelta(days=7)
+        print(one_week_ago)
+        projects = self.get_queryset().filter(upload_date__gte=one_week_ago).order_by('?')
+        serializer = self.get_serializer(projects, many=True)
+        return Response(serializer.data)

@@ -77,7 +77,6 @@ class ProjectSerializer(serializers.ModelSerializer):
     
     def get_is_liked(self, instance):
         request = self.context.get('request')
-        print(request)
         if request and request.user.is_authenticated:
             if request.user.account in instance.like_accounts.all():
                 return True
@@ -187,3 +186,33 @@ class ProjectSerializer(serializers.ModelSerializer):
             ProjectImage.objects.create(project=instance, image=image_data)
         return instance
     
+
+class HomeProjectSerializer(serializers.ModelSerializer):
+    upload_date = serializers.SerializerMethodField()
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        base_url = BASE_URL
+        if instance.project_thumbnail:
+            representation['project_thumbnail'] = base_url + instance.project_thumbnail.url
+        else:
+            representation['project_thumbnail'] = base_url + 'media/KakaoTalk_Photo_2024-10-31-14-56-43.png'
+        return representation
+
+    def get_upload_date(self, instance):
+            return instance.upload_date.strftime('%Y-%m-%d')
+    
+    class Meta:
+        model = Project
+        fields = ['id', 'project_name', 'project_thumbnail', 'upload_date', 'project_stack', 'project_genre']
+
+    project_stack = serializers.SlugRelatedField(
+        slug_field='stack_name',
+        queryset=StackTag.objects.all(),
+        many=True
+    )
+    project_genre = serializers.SlugRelatedField(
+        slug_field='genre_name',
+        queryset=GenreTag.objects.all(),
+        many=True
+    )
