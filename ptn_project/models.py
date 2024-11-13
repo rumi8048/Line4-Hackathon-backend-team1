@@ -70,6 +70,7 @@ class ProjectImage(models.Model):
 # AI 가 요약해준 피드백을 저장하는 모델
 class AIFeedbackSummary(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='ai_feedback_summary')
+    title = models.CharField(null=False, max_length=255)
     feedback_summary = models.TextField(null=False, default="")
 
 # 고민 되었던 부분 모델

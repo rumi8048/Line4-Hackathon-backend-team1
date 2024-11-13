@@ -4,7 +4,7 @@ from ptn_project.models import CollaboratorMiddleTable, Comment, Discussion, Dis
 from ptn_project.serializers import CollaboratorMiddleTableSerializer
 from .models import *
 
-BASE_URL = 'https:/dgu-booth.shop/'
+BASE_URL = 'https://dgu-booth.shop/'
 
 class InCommentSerializer(serializers.ModelSerializer):
     upload_date = serializers.SerializerMethodField()
