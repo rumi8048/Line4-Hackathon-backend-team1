@@ -5,7 +5,7 @@ from ptn_project.models import CollaboratorMiddleTable, Project
 from search.models import GenreTag, Platform, StackTag, UniversityTag
 from .models import *
 
-BASE_URL = 'http://127.0.0.1:8000/'
+BASE_URL = 'https://dgu-booth.shop/'
 
 class CollaboratorMiddleTableSerializer(serializers.ModelSerializer):
     account_id = serializers.PrimaryKeyRelatedField(queryset=Account.objects.all())  # account 필드를 쓰기 가능하게 설정
