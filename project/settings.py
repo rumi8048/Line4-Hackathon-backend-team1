@@ -31,7 +31,6 @@ SECRET_KEY = env('SECRET_KEY')
 DEBUG = env('DEBUG')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -168,3 +167,8 @@ CORS_ALLOWED_ORIGINS = [
 'http://프론트엔드주소', 
 'http://프론트주소:포트번호',
 ]
+
+# settings.py
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
