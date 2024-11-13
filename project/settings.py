@@ -51,7 +51,6 @@ INSTALLED_APPS = [
     'ptn_project',
     # 프로젝트 디테일 페이지의 기능을 모아놓은 앱
     'project_detail',
-  
     # 마이 페이지
     'mypage',
     # 대학교, 기술 스택, 장르를 필터링하는 기능을 모아놓은 앱

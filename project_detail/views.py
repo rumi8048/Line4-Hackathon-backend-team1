@@ -225,3 +225,27 @@ class DetailFeedbackViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin, 
         feedback_writer.save()
         
         return Response({'message': '피드백이 채택되었고 포인트가 추가되었습니다.'})
+    
+class AiSummaryViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin):
+
+    def get_queryset(self):
+        return AIFeedbackSummary.objects.all()
+    
+    def get_serializer_class(self):
+        return AiSummarySerializer
+
+    def list(self, request, project_id=None):
+        project = Project.objects.filter(id=project_id).first()
+        if not project:
+            return Response({'message': '프로젝트를 찾을 수 없습니다.'}, status=404)
+        
+        ai_feedback_summaries = AIFeedbackSummary.objects.filter(project=project)
+        serializer = AiSummarySerializer(ai_feedback_summaries, many=True)
+        return Response(serializer.data)
+    
+    def create(self, request, project_id=None):
+        project = get_object_or_404(Project, id=project_id)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(project=project)
+        return Response(serializer.data)

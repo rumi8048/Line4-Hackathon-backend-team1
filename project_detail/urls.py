@@ -30,6 +30,9 @@ feedback_router.register("feedback", FeedbackViewSet, basename="feedback")
 feedback_detail_router = routers.SimpleRouter(trailing_slash=False)
 feedback_detail_router.register("feedback", DetailFeedbackViewSet, basename="feedback")
 
+ai_summary_router = routers.SimpleRouter(trailing_slash=False)
+ai_summary_router.register("ai_summary", AiSummaryViewSet, basename="ai_summary")
+
 urlpatterns = [
   path('', include(project_router.urls)),
   path('<int:project_id>/', include(comment_router.urls)),
@@ -40,4 +43,5 @@ urlpatterns = [
   path('<int:project_id>/', include(discussion_detail_router.urls)),
   path('<int:project_id>/', include(feedback_router.urls)),
   path('<int:project_id>/', include(feedback_detail_router.urls)),
+  path('<int:project_id>/', include(ai_summary_router.urls)),
 ]

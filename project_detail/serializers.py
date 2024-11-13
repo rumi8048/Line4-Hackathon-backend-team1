@@ -1,10 +1,9 @@
 from rest_framework import serializers
 from accounts.models import Account
-from ptn_project.models import CollaboratorMiddleTable, Comment, Discussion, DiscussionImage, FeedbackImage, InComment, Project, UserFeedback
-from ptn_project.serializers import CollaboratorMiddleTableSerializer
+from ptn_project.models import AIFeedbackSummary, CollaboratorMiddleTable, Comment, Discussion, DiscussionImage, FeedbackImage, InComment, Project, UserFeedback
 from .models import *
-
-BASE_URL = 'https:/dgu-booth.shop/'
+from django.utils import timezone
+BASE_URL = 'https://dgu-booth.shop/'
 
 class InCommentSerializer(serializers.ModelSerializer):
     upload_date = serializers.SerializerMethodField()
@@ -194,3 +193,21 @@ class FeedbackListSerializer(serializers.ModelSerializer):
         model = UserFeedback
         exclude = ['project']
         read_only_fields = ['id', 'is_adopted']
+
+
+class AiSummarySerializer(serializers.ModelSerializer):
+    upload_date = serializers.SerializerMethodField()
+    class Meta:
+        model = AIFeedbackSummary
+        fields = ['id', 'upload_date', 'title', 'feedback_summary']
+        read_only_fields = ['id', 'title', 'upload_date']
+    
+    def get_upload_date(self, instance):
+        return instance.upload_date.strftime('%Y-%m-%d')
+    
+    def create(self, validated_data):
+        
+        upload_date = timezone.now()
+        title = f"{upload_date.strftime('%Y년 %m월 %d일')} 보고서"
+        validated_data['title'] = title
+        return super().create(validated_data)
