@@ -2,6 +2,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
 from rest_framework import viewsets, mixins
 from rest_framework.response import Response
+from project_detail.ai_script import generate_report
 from ptn_project.models import Comment, Project
 from ptn_project.serializers import ProjectSerializer
 from .models import *
@@ -245,7 +246,29 @@ class AiSummaryViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixins.
     
     def create(self, request, project_id=None):
         project = get_object_or_404(Project, id=project_id)
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save(project=project)
-        return Response(serializer.data)
+        user = request.user.account
+
+        # Check if the user has enough points
+        if user.total_point <= 0:
+            return Response({'message': '포인트가 부족합니다.'})
+        
+        serializer = FeedbackListSerializer(project.feedback, many=True, context={'request': request})
+        summary_output = generate_report(serializer.data)
+        
+        upload_date = timezone.now()
+        base_title = f"{upload_date.strftime('%y년 %m월 %d일')} 보고서"
+        title = base_title
+        counter = 1
+
+        # 동일한 이름이 있을 경우 숫자를 늘려가면서 title 설정
+        while AIFeedbackSummary.objects.filter(title=title).exists():
+            title = f"{base_title} ({counter})"
+            counter += 1
+
+        result = AIFeedbackSummary.objects.create(project=project, feedback_summary=summary_output, title=title, upload_date=upload_date)
+        # Decrease the user's total points by 1
+        user.total_point -= 1
+        user.save()
+
+        return Response(AiSummarySerializer(result).data)
+    

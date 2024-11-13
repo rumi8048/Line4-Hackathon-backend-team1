@@ -1,15 +1,16 @@
 import openai
 import json
-import os
+
+from project.settings import OPENAI_API_KEY
 
 
-# OpenAI API 키 가져오기
-api_key = os.getenv("OPENAI_API_KEY")
+
 # OpenAI API 클라이언트 설정
 client = openai.OpenAI(
-    api_key=api_key
+    api_key=OPENAI_API_KEY
 )
 
+input_data = []
 # GPT 요청 함수
 def generate_report(input_data):
     reports = []
@@ -55,53 +56,54 @@ def generate_report(input_data):
     return reports
 
 # 입력 JSON 데이터
-input_data = [
-    {
-        "id": 1,
-        "feedback_writer": "밍키",
-        "upload_date": "2024-11-13",
-        "images": [],
-        "discussion": [{
-                "id": 5,
-                "discussion_writer": {
-                    "nickname": "밍키",
-                    "role": "슈퍼유저!!",
-                    "university": "대학교1"
-                },
-                "title": "테스트1-1",
-                "description": "백엔드의 CSRF 토큰 오류가 납니다.",
-                "images": []
-            }],
-        "can_update_and_delete": True,
-        "is_collaborator": True,
-        "is_adopted": False,
-        "feedback_description": "흠... 그 부분은 로그인할 때 JWT 토큰 방식을 사용하시는 것을 추천드립니다. 그러면 CSRF 오류가 나지 않습니다."
-    },
-    {
-        "id": 2,
-        "feedback_writer": "밍키",
-        "upload_date": "2024-11-13",
-        "images": [],
-        "discussion": [
-            {
-                "id": 4,
-                "discussion_writer": {
-                    "nickname": "밍키",
-                    "role": "슈퍼유저!!",
-                    "university": "대학교1"
-                },
-                "title": "테스트1-1",
-                "description": "프론트,백 통신할 때 오류가 나요ㅜㅜ",
-                "images": []
-            }
-        ],
-        "can_update_and_delete": True,
-        "is_collaborator": True,
-        "is_adopted": False,
-        "feedback_description": "음 저건 http 를 사용해서 생기는 오류네요. https 로 수정해주세요."
-    }
-]
+# input_data = 
+# [
+#     {
+#         "id": 1,
+#         "feedback_writer": "밍키",
+#         "upload_date": "2024-11-13",
+#         "images": [],
+#         "discussion": [{
+#                 "id": 5,
+#                 "discussion_writer": {
+#                     "nickname": "밍키",
+#                     "role": "슈퍼유저!!",
+#                     "university": "대학교1"
+#                 },
+#                 "title": "테스트1-1",
+#                 "description": "백엔드의 CSRF 토큰 오류가 납니다.",
+#                 "images": []
+#             }],
+#         "can_update_and_delete": True,
+#         "is_collaborator": True,
+#         "is_adopted": False,
+#         "feedback_description": "흠... 그 부분은 로그인할 때 JWT 토큰 방식을 사용하시는 것을 추천드립니다. 그러면 CSRF 오류가 나지 않습니다."
+#     },
+#     {
+#         "id": 2,
+#         "feedback_writer": "밍키",
+#         "upload_date": "2024-11-13",
+#         "images": [],
+#         "discussion": [
+#             {
+#                 "id": 4,
+#                 "discussion_writer": {
+#                     "nickname": "밍키",
+#                     "role": "슈퍼유저!!",
+#                     "university": "대학교1"
+#                 },
+#                 "title": "테스트1-1",
+#                 "description": "프론트,백 통신할 때 오류가 나요ㅜㅜ",
+#                 "images": []
+#             }
+#         ],
+#         "can_update_and_delete": True,
+#         "is_collaborator": True,
+#         "is_adopted": False,
+#         "feedback_description": "음 저건 http 를 사용해서 생기는 오류네요. https 로 수정해주세요."
+#     }
+# ]
 
 # 보고서 생성 실행 및 JSON 형식으로 출력
 output_report = generate_report(input_data)
-print(json.dumps(output_report, ensure_ascii=False, indent=4))
+# print(json.dumps(output_report, ensure_ascii=False, indent=4))
