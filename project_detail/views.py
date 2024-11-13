@@ -246,6 +246,12 @@ class AiSummaryViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixins.
     
     def create(self, request, project_id=None):
         project = get_object_or_404(Project, id=project_id)
+        user = request.user.account
+
+        # Check if the user has enough points
+        if user.total_point <= 0:
+            return Response({'message': '포인트가 부족합니다.'})
+        
         serializer = FeedbackListSerializer(project.feedback, many=True, context={'request': request})
         summary_output = generate_report(serializer.data)
         
@@ -260,6 +266,9 @@ class AiSummaryViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixins.
             counter += 1
 
         result = AIFeedbackSummary.objects.create(project=project, feedback_summary=summary_output, title=title, upload_date=upload_date)
+        # Decrease the user's total points by 1
+        user.total_point -= 1
+        user.save()
 
         return Response(AiSummarySerializer(result).data)
     
