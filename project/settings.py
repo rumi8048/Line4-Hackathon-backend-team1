@@ -168,14 +168,14 @@ CORS_ALLOWED_ORIGINS = [
 'http://프론트주소:포트번호',
 ]
 
-# CSRF_TRUSTED_ORIGINS = [
-#     'https://dgu-booth.shop',
-#     'https://www.dgu-booth.shop',
-# ]
+CSRF_TRUSTED_ORIGINS = [
+    'https://dgu-booth.shop',
+    'http://dgu-booth.shop',
+]
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = True
 USE_X_FORWARDED_PORT = True
 
-# SESSION_COOKIE_SECURE = True
-# CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
