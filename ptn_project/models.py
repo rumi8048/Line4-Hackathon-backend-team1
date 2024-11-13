@@ -71,7 +71,9 @@ class ProjectImage(models.Model):
 class AIFeedbackSummary(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='ai_feedback_summary')
     title = models.CharField(null=False, max_length=255)
-    feedback_summary = models.TextField(null=False, default="")
+    feedback_summary = models.JSONField(null=False, blank=True, default=dict)
+    # 업로드 날짜
+    upload_date = models.DateTimeField(auto_now_add=True)
 
 # 고민 되었던 부분 모델
 class Discussion(models.Model):
