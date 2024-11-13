@@ -64,6 +64,8 @@ INSTALLED_APPS = [
 
 
 MIDDLEWARE = [
+    'sslify.middleware.SSLifyMiddleware',
+
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
 
