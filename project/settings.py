@@ -168,7 +168,11 @@ CORS_ALLOWED_ORIGINS = [
 'http://프론트주소:포트번호',
 ]
 
-# settings.py
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+CSRF_TRUSTED_ORIGINS = [
+    'https://dgu-booth.shop',
+    'http://dgu-booth.shop',
+    'https://dgu-booth.shop/',
+]
 
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SESSION_COOKIE_SECURE = True
