@@ -259,12 +259,14 @@ class AiSummaryViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixins.
         base_title = f"{upload_date.strftime('%y년 %m월 %d일')} 보고서"
         title = base_title
         counter = 1
-
-        # 동일한 이름이 있을 경우 숫자를 늘려가면서 title 설정
-        while AIFeedbackSummary.objects.filter(title=title).exists():
-            title = f"{base_title} ({counter})"
-            counter += 1
-
+        try :
+            # 동일한 이름이 있을 경우 숫자를 늘려가면서 title 설정
+            while AIFeedbackSummary.objects.filter(title=title).exists():
+                title = f"{base_title} ({counter})"
+                counter += 1
+        except:
+            title = base_title
+            
         result = AIFeedbackSummary.objects.create(project=project, feedback_summary=summary_output, title=title, upload_date=upload_date)
         # Decrease the user's total points by 1
         user.total_point -= 1
