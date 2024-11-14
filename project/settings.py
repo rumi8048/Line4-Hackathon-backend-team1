@@ -207,8 +207,8 @@ CORS_ALLOWED_ORIGINS = [
 'http://127.0.0.1:5173',
 # 프론트엔드 도메인 또는 IP주소
 # 예를 들어, 아래와 같이 입력
-'http://프론트엔드주소', 
-'http://프론트주소:포트번호',
+'https://p-rog.netlify.app/',
+'https://p-rog.netlify.app',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
