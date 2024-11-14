@@ -39,7 +39,7 @@ class ProjectViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixins.Li
         serializer = ProjectSerializer(projects, many=True)
         return Response(serializer.data)
     
-    @action(detail=False, methods=['post'], url_path='filter')
+    @action(detail=False, methods=['post'], url_path='filter_by_genre')
     def filter_by_genre(self, request):
         genres = request.data.get('genre', [])
         if not genres:
@@ -53,6 +53,44 @@ class ProjectViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixins.Li
         projects = Project.objects.all()
         for genre_tag in genre_tags:
             projects = projects.filter(project_genre=genre_tag)
+
+        projects = projects.distinct()
+        serializer = self.get_serializer(projects, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=['post'], url_path='filter_by_university')
+    def filter_by_university(self, request):
+        universities = request.data.get('university', [])
+        if not universities:
+            return Response({'error': 'No universities provided.'})
+
+        university_tags = UniversityTag.objects.filter(university_name__in=universities)
+        if not university_tags.exists():
+            return Response({'error': 'No matching universities found.'})
+
+        # 모든 장르 태그가 포함된 프로젝트 필터링
+        projects = Project.objects.all()
+        for university_tag in university_tags:
+            projects = projects.filter(project_university=university_tag)
+
+        projects = projects.distinct()
+        serializer = self.get_serializer(projects, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=['post'], url_path='filter_by_stack')
+    def filter_by_stack(self, request):
+        stacks = request.data.get('stack', [])
+        if not stacks:
+            return Response({'error': 'No stacks provided.'})
+
+        stack_tags = StackTag.objects.filter(stack_name__in=stacks)
+        if not stack_tags.exists():
+            return Response({'error': 'No matching stacks found.'})
+
+        # 모든 장르 태그가 포함된 프로젝트 필터링
+        projects = Project.objects.all()
+        for stack_tag in stack_tags:
+            projects = projects.filter(project_stack=stack_tag)
 
         projects = projects.distinct()
         serializer = self.get_serializer(projects, many=True)
