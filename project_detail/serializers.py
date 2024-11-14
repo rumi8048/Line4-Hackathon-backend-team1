@@ -3,7 +3,7 @@ from accounts.models import Account
 from ptn_project.models import AIFeedbackSummary, CollaboratorMiddleTable, Comment, Discussion, DiscussionImage, FeedbackImage, InComment, Project, UserFeedback
 from .models import *
 from django.utils import timezone
-BASE_URL = 'https://dgu-booth.shop/'
+BASE_URL = 'https://dgu-booth.shop'
 
 class InCommentSerializer(serializers.ModelSerializer):
     upload_date = serializers.SerializerMethodField()
