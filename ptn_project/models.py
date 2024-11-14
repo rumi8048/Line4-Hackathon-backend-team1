@@ -18,7 +18,7 @@ def discussion_image_upload_path(instance, filename):
 
 class Project(models.Model):
     project_name = models.CharField(null=False, max_length=255)
-    project_thumbnail = models.ImageField(null=True, upload_to=thumbnail_upload_path, default='KakaoTalk_Photo_2024-10-31-14-56-43.png')
+    project_thumbnail = models.ImageField(null=True, upload_to=thumbnail_upload_path, default='default.png')
     # 간단한 설명
     simple_description = models.TextField(null=False, default="")
     # 세부 설명
@@ -63,7 +63,7 @@ class CollaboratorMiddleTable(models.Model):
 class ProjectImage(models.Model):
     # 프로젝트를 외래키로 가짐
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='project_image')
-    image = models.ImageField(null=True, upload_to=detail_image_upload_path, default='KakaoTalk_Photo_2024-10-31-14-56-43.png')
+    image = models.ImageField(null=True, upload_to=detail_image_upload_path)
 
 
 
@@ -100,12 +100,12 @@ class UserFeedback(models.Model):
 class FeedbackImage(models.Model):
     # 피드백을 외래키로 가짐
     feedback = models.ForeignKey(UserFeedback, on_delete=models.CASCADE, related_name='feedback_image')
-    image = models.ImageField(null=True, upload_to=feedback_image_upload_path, default='KakaoTalk_Photo_2024-10-31-14-56-43.png')
+    image = models.ImageField(null=True, upload_to=feedback_image_upload_path)
 
 class DiscussionImage(models.Model):
     # 고민 되었던 부분을 외래키로 가짐
     discussion = models.ForeignKey(Discussion, on_delete=models.CASCADE, related_name='discussion_image')
-    image = models.ImageField(null=True, upload_to=discussion_image_upload_path, default='KakaoTalk_Photo_2024-10-31-14-56-43.png')
+    image = models.ImageField(null=True, upload_to=discussion_image_upload_path)
 
 class Comment(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='comment')
