@@ -18,7 +18,7 @@ class ProjectViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixins.Li
         serializers.is_valid(raise_exception=True)
          # project_thumbnail이 null인 경우 기본 이미지 설정
         if not serializers.validated_data.get('project_thumbnail'):
-            serializers.validated_data['project_thumbnail'] = 'ptn_project/default_image.png'
+            serializers.validated_data['project_thumbnail'] = 'ptn_project/thumbnail/default.png'
 
         self.perform_create(serializers)
         return Response({'message': '프로젝트가 성공적으로 생성되었습니다.', 'project_id': serializers.data.get('id')})
