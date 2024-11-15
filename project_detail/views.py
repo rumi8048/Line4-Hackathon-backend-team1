@@ -129,15 +129,17 @@ class DiscussionViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixins
     
     def create(self, request, project_id=None):
         project = get_object_or_404(Project, id=project_id)
+        discussion_writer_id = request.data.get('discussion_writer')
+        discussion_writer = get_object_or_404(Account, id=discussion_writer_id)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save(discussion_writer=request.user.account, project=project)
+        serializer.save(project=project, discussion_writer=discussion_writer)
         return Response(serializer.data)
     
-    def get_permissions(self):
-        if self.action in ["create"]:
-            return [IsPossibleDiscussionOrReadOnly()]
-        return []
+    # def get_permissions(self):
+    #     if self.action in ["create"]:
+    #         return [IsPossibleDiscussionOrReadOnly()]
+    #     return []
     
     def get_queryset(self):
         project = self.kwargs.get("project_id")
