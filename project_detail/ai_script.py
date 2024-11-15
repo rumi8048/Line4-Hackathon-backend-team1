@@ -1,6 +1,5 @@
 import openai
-import json
-
+import re
 from project.settings import OPENAI_API_KEY
 
 
@@ -11,6 +10,13 @@ client = openai.OpenAI(
 )
 
 input_data = []
+# 특수기호 및 접두사를 필터링하는 함수
+def clean_text(text):
+    # 불필요한 접두사 및 특수기호 제거
+    text = re.sub(r"^(해결책:|요약:|제목:)\s*", "", text)  # 접두사 제거
+    text = re.sub(r"[*\n]", "", text)  # 모든 별표 및 줄바꿈 문자 제거
+    return text.strip()
+
 # GPT 요청 함수
 def generate_report(input_data):
     reports = []
@@ -23,35 +29,43 @@ def generate_report(input_data):
             # 피드백과 토론 내용을 결합
             combined_text = f"Feedback: {feedback_desc}. Discussion: {discussion_desc}"
 
-            # GPT API 요청을 통해 요약 및 해결책 생성
-            response = client.chat.completions.create(
-                model="gpt-4o",
-                messages=[
-                    {"role": "system", "content": "You are a professional summarizer and problem solver. Summarize the feedback and discussion, then provide a solution. Use a polite tone in Korean. Do not include prefixes like '제목:' or '요약:'."},
-                    {"role": "user", "content": f"Summarize the following and provide a solution:\n\n{combined_text}\n\nOutput a title, summary, and solution without any prefixes or unnecessary text."}
-                ]
-            )
+            try:
+                # GPT API 요청을 통해 요약 및 해결책 생성
+                response = client.chat.completions.create(
+                    model="gpt-4o",
+                    messages=[
+                        {"role": "system", "content": "You are a professional summarizer and problem solver. Summarize the feedback and discussion, then provide a solution. Use a polite tone in Korean. Do not include prefixes like '제목:' or '요약:'."},
+                        {"role": "user", "content": f"Summarize the following and provide a solution:\n\n{combined_text}\n\nOutput a title, summary, and solution without any prefixes or unnecessary text."}
+                    ]
+                )
 
-            # 응답에서 title, summary, solution 추출
-            result = response.choices[0].message.content.strip()
+                # API 응답의 구조를 출력하여 디버깅
+                print("API Response:", response)
 
-            if result:
-                # 결과를 파싱하여 title, summary, solution 분리
-                sections = result.split("\n\n")
-                title = sections[0].strip()
-                summary = sections[1].strip() if len(sections) > 1 else ""
-                solution = sections[2].strip() if len(sections) > 2 else ""
+                # 응답에서 title, summary, solution 추출
+                result = response.choices[0].message.content.strip()
 
-                # 보고서에 필요한 필드만 추가
-                report = {
-                    "title": title,
-                    "summary": summary
-                }
+                if result:
+                    # 결과를 파싱하여 title, summary, solution 분리
+                    sections = result.split("\n\n")
+                    title = clean_text(sections[0].strip())
+                    
+                    # summary가 비어 있으면 자동으로 생성
+                    summary = clean_text(sections[1].strip()) if len(sections) > 1 else f"{discussion_desc}에 대해 '{feedback_desc}'라는 피드백이 제공되었습니다."
+                    
+                    # solution이 비어 있으면 자동으로 생성
+                    solution = clean_text(sections[2].strip()) if len(sections) > 2 else ""
 
-                if solution:
-                    report["solution"] = solution
+                    # 보고서에 필요한 필드만 추가
+                    report = {
+                        "title": title,
+                        "summary": summary,
+                        "solution": solution
+                    }
 
-                reports.append(report)
+                    reports.append(report)
+            except Exception as e:
+                print("Error processing response:", e)
 
     return reports
 
