@@ -48,10 +48,12 @@ class SignUpSerializer(serializers.ModelSerializer):
         account = Account.objects.create(
             user=user,
             user_university=validated_data['user_university'],
+            
             nickname=validated_data['nickname'],
             name=validated_data['name'],
             description=validated_data.get('description', "")
         )
+        account.favorite_genre.set(validated_data.get('favorite_genre', []))
         return account
     
 class AccountSerializer(serializers.ModelSerializer):
