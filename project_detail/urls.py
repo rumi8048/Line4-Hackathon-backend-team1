@@ -27,6 +27,9 @@ discussion_detail_router.register("discussion", DetailDiscussionViewSet, basenam
 feedback_router = routers.SimpleRouter(trailing_slash=False)
 feedback_router.register("feedback", FeedbackViewSet, basename="feedback")
 
+adopt_feedback_router = routers.SimpleRouter(trailing_slash=False)
+adopt_feedback_router.register("adopt_feedback", AdoptFeedbackViewSet, basename="adopt_feedback")
+
 feedback_detail_router = routers.SimpleRouter(trailing_slash=False)
 feedback_detail_router.register("feedback", DetailFeedbackViewSet, basename="feedback")
 
@@ -42,6 +45,7 @@ urlpatterns = [
   path('<int:project_id>/', include(discussion_router.urls)),
   path('<int:project_id>/', include(discussion_detail_router.urls)),
   path('<int:project_id>/', include(feedback_router.urls)),
+  path('<int:project_id>/', include(adopt_feedback_router.urls)),
   path('<int:project_id>/', include(feedback_detail_router.urls)),
   path('<int:project_id>/', include(ai_summary_router.urls)),
 ]
