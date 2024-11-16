@@ -160,7 +160,7 @@ class DetailDiscussionViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin
         return Response({'message': '고민 게시글이 성공적으로 삭제되었습니다.'})
 
 class FeedbackViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin):
-    queryset = UserFeedback.objects.all()
+    # queryset = UserFeedback.objects.all()
 
     def get_serializer_class(self):
         if self.action in ["create", "update", "partial_update"]:
@@ -183,7 +183,17 @@ class FeedbackViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Cre
         project = self.kwargs.get("project_id")
         queryset = UserFeedback.objects.filter(project_id=project)
         return queryset
-
+    
+class AdoptFeedbackViewSet(viewsets.GenericViewSet, mixins.ListModelMixin):
+   
+    serializer_class = FeedbackListSerializer
+    
+    def get_queryset(self):
+        project = self.kwargs.get("project_id")
+        queryset = UserFeedback.objects.filter(project_id=project, is_adopted=True)
+        return queryset
+    
+    
 class DetailFeedbackViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
     queryset = UserFeedback.objects.all()
     
