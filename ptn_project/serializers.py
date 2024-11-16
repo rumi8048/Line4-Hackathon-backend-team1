@@ -96,7 +96,7 @@ class ProjectSerializer(serializers.ModelSerializer):
         if instance.project_thumbnail:
             representation['project_thumbnail'] = base_url + instance.project_thumbnail.url
         else:
-            representation['project_thumbnail'] = base_url + 'media/KakaoTalk_Photo_2024-10-31-14-56-43.png'
+            representation['project_thumbnail'] = base_url + 'media/default.png'
         return representation
     
     def create(self, validated_data):
@@ -204,7 +204,7 @@ class HomeProjectSerializer(serializers.ModelSerializer):
         if instance.project_thumbnail:
             representation['project_thumbnail'] = base_url + instance.project_thumbnail.url
         else:
-            representation['project_thumbnail'] = base_url + 'media/KakaoTalk_Photo_2024-10-31-14-56-43.png'
+            representation['project_thumbnail'] = base_url + 'media/default.png'
         return representation
 
     def get_upload_date(self, instance):
