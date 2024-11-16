@@ -17,7 +17,7 @@ def discussion_image_upload_path(instance, filename):
 # Create your models here.
 
 class Project(models.Model):
-    project_name = models.CharField(null=False, max_length=255)
+    project_name = models.CharField(null=False, max_length=255, blank=True)
     project_thumbnail = models.ImageField(null=True, upload_to=thumbnail_upload_path, default='default.png')
     # 간단한 설명
     simple_description = models.TextField(null=False, default="")
@@ -48,7 +48,7 @@ class Project(models.Model):
     # 대학
     project_university = models.ManyToManyField(UniversityTag, related_name= "project")
     # 참여자
-    collaborator = models.ManyToManyField(Account, through='CollaboratorMiddleTable', related_name='collaborator_projects')
+    collaborator = models.ManyToManyField(Account, through='CollaboratorMiddleTable', related_name='collaborator_projects', blank=True)
 
     
 
