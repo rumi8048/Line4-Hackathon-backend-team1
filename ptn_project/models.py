@@ -17,7 +17,7 @@ def discussion_image_upload_path(instance, filename):
 # Create your models here.
 
 class Project(models.Model):
-    project_name = models.CharField(null=False, max_length=255, blank=True)
+    project_name = models.CharField(null=True, max_length=255, blank=True)
     project_thumbnail = models.ImageField(null=True, upload_to=thumbnail_upload_path, default='default.png')
     # 간단한 설명
     simple_description = models.TextField(null=False, default="")
