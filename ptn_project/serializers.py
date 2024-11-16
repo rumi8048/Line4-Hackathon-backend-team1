@@ -142,7 +142,8 @@ class ProjectSerializer(serializers.ModelSerializer):
 
         # project_thumbnail 필드 처리
         if 'project_thumbnail' in validated_data:
-            if instance.project_thumbnail:
+            print(instance.project_thumbnail.name)
+            if instance.project_thumbnail and instance.project_thumbnail.name != 'ptn_project/default.png':
                 # 기존 이미지를 삭제
                 instance.project_thumbnail.delete(save=False)
             instance.project_thumbnail = validated_data.pop('project_thumbnail')
