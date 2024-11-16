@@ -36,6 +36,7 @@ class ProjectSerializer(serializers.ModelSerializer):
     collaborator = CollaboratorMiddleTableSerializer(source='collaboratormiddletable_set', many=True)
     upload_date = serializers.SerializerMethodField()
     is_liked = serializers.SerializerMethodField()
+    is_scraped = serializers.SerializerMethodField()
     can_update_and_delete = serializers.SerializerMethodField()
 
     project_platform = serializers.SlugRelatedField(
@@ -79,6 +80,13 @@ class ProjectSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         if request and request.user.is_authenticated:
             if request.user.account in instance.like_accounts.all():
+                return True
+        return False
+    
+    def get_is_scraped(self, instance):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            if request.user.account in instance.scrap_accounts.all():
                 return True
         return False
     
