@@ -33,7 +33,7 @@ class ProjectImageSerializer(serializers.ModelSerializer):
     
 class ProjectSerializer(serializers.ModelSerializer):
     images = ProjectImageSerializer(source='project_image', many=True, required=False)
-    collaborator = CollaboratorMiddleTableSerializer(source='collaboratormiddletable_set', many=True)
+    collaborator = CollaboratorMiddleTableSerializer(source='collaboratormiddletable_set', many=True, required=False)
     upload_date = serializers.SerializerMethodField()
     is_liked = serializers.SerializerMethodField()
     is_scraped = serializers.SerializerMethodField()
